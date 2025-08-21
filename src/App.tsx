@@ -1,32 +1,63 @@
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { ChakraProvider } from "@chakra-ui/react";
 import Login from "./pages/Login";
 import Menu from "./pages/Menu";
 import { UserProvider, useUser } from "./context/UserContext";
+import { CartProvider } from "./context/CartContext";
+import type { ReactNode } from "react";
+import AdminLogin from "./admin/pages/Login";
+import AdminRoute from "./admin/Route";
+import AdminDashboard from "./admin/pages/Dashboard";
 
-// Protected route component
-function ProtectedRoute({ children }: { children: React.ReactNode }) {
-  const { user } = useUser();
-  if (!user) return <Navigate to="/" replace />;
-  return children;
+function ProtectedRoute({ children }: { children: ReactNode }) {
+  const { user, loading } = useUser();
+
+  if (loading) {
+    return <div>Loading...</div>; // or a Chakra Spinner
+  }
+
+  return user ? children : <Navigate to="/" replace />;
 }
 
 function App() {
   return (
-    <UserProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Login />} />
-          <Route
-            path="/menu"
-            element={
-              <ProtectedRoute>
-                <Menu />
-              </ProtectedRoute>
-            }
-          />
-        </Routes>
-      </Router>
-    </UserProvider>
+    <ChakraProvider>
+      <UserProvider>
+        <CartProvider>
+          <BrowserRouter>
+            <Routes>
+              <Route path="/admin/login" element={<AdminLogin />} />
+              <Route
+                path="/admin/dashboard"
+                element={
+                  <AdminRoute>
+                    <AdminDashboard />
+                  </AdminRoute>
+                }
+              />
+              <Route path="/" element={<Login />} />
+              <Route
+                path="/menu"
+                element={
+                  <ProtectedRoute>
+                    <Menu />
+                  </ProtectedRoute>
+                }
+              />
+              {/* placeholder for cart page */}
+              <Route
+                path="/cart"
+                element={
+                  <ProtectedRoute>
+                    <div>Cart Page (coming soon)</div>
+                  </ProtectedRoute>
+                }
+              />
+            </Routes>
+          </BrowserRouter>
+        </CartProvider>
+      </UserProvider>
+    </ChakraProvider>
   );
 }
 

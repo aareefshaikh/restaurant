@@ -5,15 +5,22 @@ import {
 import { useForm } from "react-hook-form";
 import { useNavigate } from "react-router-dom";
 import { useUser } from "../context/UserContext";
+import { useEffect } from "react";
 
 interface LoginForm {
   name: string;
   phone: string;
 }
 
-function Login() {
+const Login = () => {
   const navigate = useNavigate();
-  const { setUser } = useUser();
+  const { setUser, user } = useUser();
+
+  useEffect(() => {
+    if (user) {
+      navigate("/menu", { replace: true });
+    }
+  }, [user, navigate]);
 
   const { register, handleSubmit, formState: { errors } } = useForm<LoginForm>();
 
@@ -53,7 +60,7 @@ function Login() {
               })}
             />
             <FormErrorMessage>
-              {errors.phone && "Enter a valid 10-digit Indian phone number"}
+              {errors.phone && "Enter a valid phone number"}
             </FormErrorMessage>
           </FormControl>
 
