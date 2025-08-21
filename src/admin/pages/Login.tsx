@@ -1,8 +1,8 @@
 import { Box, Button, Input, VStack, Text, FormControl, FormErrorMessage } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { useForm } from "react-hook-form";
-import { useEffect } from "react";
 import { supabase } from "../../supabase";
+import { useEffect } from "react";
 
 type FormData = {
   email: string;
@@ -16,7 +16,7 @@ export default function AdminLogin() {
   useEffect(() => {
     const admin = localStorage.getItem("admin");
     if (admin) {
-      navigate("/admin/dashboard");
+      navigate("/admin/");
     }
   }, [navigate]);
 
@@ -28,7 +28,7 @@ export default function AdminLogin() {
       alert(error.message);
     } else if (session) {
       localStorage.setItem("admin", JSON.stringify({ email }));
-      navigate("/admin/dashboard");
+      navigate("/admin/");
     }
   };
 

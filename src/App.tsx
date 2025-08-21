@@ -6,8 +6,9 @@ import { UserProvider, useUser } from "./context/UserContext";
 import { CartProvider } from "./context/CartContext";
 import type { ReactNode } from "react";
 import AdminLogin from "./admin/pages/Login";
-import AdminRoute from "./admin/Route";
-import AdminDashboard from "./admin/pages/Dashboard";
+import AdminLayout from "./admin/pages/Layout";
+import MenuManagement from "./admin/pages/MenuManagement";
+import Orders from "./admin/pages/OrderManagement";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useUser();
@@ -27,14 +28,11 @@ function App() {
           <BrowserRouter>
             <Routes>
               <Route path="/admin/login" element={<AdminLogin />} />
-              <Route
-                path="/admin/dashboard"
-                element={
-                  <AdminRoute>
-                    <AdminDashboard />
-                  </AdminRoute>
-                }
-              />
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route path="menu" element={<MenuManagement />} />
+                <Route path="orders" element={<Orders />} />
+                <Route index element={<Navigate to="/admin/orders" replace />} />
+              </Route>
               <Route path="/" element={<Login />} />
               <Route
                 path="/menu"
