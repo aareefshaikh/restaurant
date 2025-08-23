@@ -1,7 +1,6 @@
 import { useEffect, useState } from "react";
 import {
   Box,
-  Button,
   Table,
   Thead,
   Tbody,
@@ -14,7 +13,7 @@ import {
   useDisclosure,
   Image,
   useToast,
-  IconButton
+  IconButton,
 } from "@chakra-ui/react";
 import { supabase } from "../../supabase";
 import CreateEditMenuItem from "./CreateEditMenuItem";
@@ -27,12 +26,14 @@ type MenuItem = {
   price: number;
   is_available: boolean;
   image_url: string;
+  position: number;
 };
 
 type Category = {
   id: number;
   name: string;
   parent_id: number | null;
+  position: number;
 };
 
 export default function MenuManagement() {
@@ -46,11 +47,11 @@ export default function MenuManagement() {
 
   const fetchData = async () => {
     setLoading(true);
-    const { data: catData } = await supabase.from<string, Category>("category").select("id, name, parent_id");
+    const { data: catData } = await supabase.from<string, Category>("category").select("id, name, parent_id, position");
     const { data: menuData } = await supabase
       .from<string, MenuItem>("menu_item")
-      .select("id, name, category_id, price, is_available, image_url")
-      .order("name");
+      .select("id, name, category_id, price, is_available, image_url, position")
+      .order("position");
 
     setCategories(catData || []);
     setMenuItems(menuData || []);
@@ -123,6 +124,7 @@ export default function MenuManagement() {
         is_available: data.is_available,
         category_id: data.category_id,
         image_url: filePath,
+        position: data.position,
       }).eq("id", editingItem.id);
       
       if (error) {
@@ -136,6 +138,7 @@ export default function MenuManagement() {
         is_available: data.is_available,
         category_id: data.category_id,
         image_url: filePath,
+        position: data.position,
       });
 
       if (error) {
@@ -181,6 +184,7 @@ export default function MenuManagement() {
             <Th>Category</Th>
             <Th isNumeric>Price</Th>
             <Th>Available</Th>
+            <Th>Position</Th>
             <Th>Actions</Th>
           </Tr>
         </Thead>
@@ -194,6 +198,7 @@ export default function MenuManagement() {
               <Td>{getCategoryName(item.category_id)}</Td>
               <Td isNumeric>₹{item.price}</Td>
               <Td>{item.is_available ? "Yes" : "No"}</Td>
+              <Td>{item.position}</Td>
               <Td>
                 <HStack spacing={2}>
                   

@@ -47,6 +47,7 @@ export default function CreateEditMenuItem({
         price: editingItem.price,
         is_available: editingItem.is_available,
         category_id: editingItem.category_id,
+        position: editingItem.position,
       });
     } else {
       reset({
@@ -54,6 +55,7 @@ export default function CreateEditMenuItem({
         price: "",
         is_available: true,
         category_id: "",
+        position: "",
       });
     }
   }, [editingItem, reset]);
@@ -105,6 +107,23 @@ export default function CreateEditMenuItem({
           <FormControl mb={3} display="flex" alignItems="center">
             <FormLabel mb="0">Available</FormLabel>
             <Switch {...register("is_available")} />
+          </FormControl>
+
+          <FormControl mb={3}>
+            <FormLabel>Position</FormLabel>
+            <Input
+              type="number"
+              step="1"
+              placeholder="Enter position"
+              {...register("position", {
+                required: "Position is required",
+                pattern: {
+                  value: /^-?\d+$/,
+                  message: 'Only integers allowed'
+                },
+              })}
+            />
+            {errors.price && <Box color="red.400">Position is required</Box>}
           </FormControl>
 
           <FormControl mb={3}>

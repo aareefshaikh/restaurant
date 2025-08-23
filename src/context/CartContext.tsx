@@ -1,45 +1,63 @@
-import { createContext, useContext, useState, useEffect } from "react";
+// CartContext.tsx
+import React, { createContext, useContext, useEffect, useState } from "react";
+import type { MenuItem } from "../pages/Menu";
 
-export interface MenuItem {
-  id: number;
-  name: string;
-  price: number;
-}
+type CartItem = MenuItem & { quantity: number };
 
-interface CartContextType {
-  cart: MenuItem[];
+type CartContextType = {
+  cart: Record<string, CartItem>;
   addItem: (item: MenuItem) => void;
-  removeItem: (id: number) => void;
+  removeItem: (item: MenuItem) => void;
   clearCart: () => void;
-}
+};
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-export const CartProvider = ({ children }: { children: React.ReactNode }) => {
-  const [cart, setCart] = useState<MenuItem[]>([]);
+export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const [cart, setCart] = useState<Record<string, CartItem>>({});
 
-  // Load from localStorage on mount
+  // Load once from localStorage
   useEffect(() => {
     const saved = localStorage.getItem("cart");
-    if (saved) {
-      setCart(JSON.parse(saved));
-    }
+    if (saved) setCart(JSON.parse(saved));
   }, []);
 
-  // Persist cart to localStorage whenever it changes
+  // Save every time cart changes
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
   const addItem = (item: MenuItem) => {
-    setCart(prev => [...prev, item]);
+    setCart(prev => {
+      const existing = prev[item.id];
+      return {
+        ...prev,
+        [item.id]: {
+          ...item,
+          quantity: existing ? existing.quantity + 1 : 1,
+        },
+      };
+    });
   };
 
-  const removeItem = (id: number) => {
-    setCart(prev => prev.filter(item => item.id !== id));
+  const removeItem = (item: MenuItem) => {
+    setCart(prev => {
+      const existing = prev[item.id];
+      if (!existing) return prev;
+
+      if (existing.quantity <= 1) {
+        const { [item.id]: _, ...rest } = prev;
+        return rest;
+      }
+
+      return {
+        ...prev,
+        [item.id]: { ...existing, quantity: existing.quantity - 1 },
+      };
+    });
   };
 
-  const clearCart = () => setCart([]);
+  const clearCart = () => setCart({});
 
   return (
     <CartContext.Provider value={{ cart, addItem, removeItem, clearCart }}>

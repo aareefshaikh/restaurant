@@ -42,7 +42,6 @@ function App() {
                   </ProtectedRoute>
                 }
               />
-              {/* placeholder for cart page */}
               <Route
                 path="/cart"
                 element={
