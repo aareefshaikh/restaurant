@@ -2,16 +2,16 @@
 import React, { createContext, useContext, useEffect, useState } from "react";
 import type { MenuItem } from "../pages/Menu";
 
-type CartItem = MenuItem & { quantity: number };
+export type CartItem = MenuItem & { quantity: number };
 
-type CartContextType = {
+export type CartContextType = {
   cart: Record<string, CartItem>;
   addItem: (item: MenuItem) => void;
   removeItem: (item: MenuItem) => void;
   clearCart: () => void;
 };
 
-const CartContext = createContext<CartContextType | undefined>(undefined);
+export const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [cart, setCart] = useState<Record<string, CartItem>>({});

@@ -9,6 +9,7 @@ import AdminLogin from "./admin/pages/Login";
 import AdminLayout from "./admin/pages/Layout";
 import MenuManagement from "./admin/pages/MenuManagement";
 import Orders from "./admin/pages/OrderManagement";
+import Cart from "./pages/Cart";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useUser();
@@ -46,7 +47,7 @@ function App() {
                 path="/cart"
                 element={
                   <ProtectedRoute>
-                    <div>Cart Page (coming soon)</div>
+                    <Cart />
                   </ProtectedRoute>
                 }
               />

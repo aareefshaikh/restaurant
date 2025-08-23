@@ -15,7 +15,7 @@ import {
 } from "@chakra-ui/react";
 import { SmallCloseIcon } from "@chakra-ui/icons"; // for logout
 import { useCart } from "../context/CartContext";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import logo from "../assets/logo.png"; // adjust path if needed
 
 const Header: React.FC = () => {
@@ -45,12 +45,14 @@ const Header: React.FC = () => {
       boxShadow="sm"
     >
       {/* Logo */}
-      <HStack spacing={2}>
-        <Image src={logo} alt="Restaurant Logo" boxSize="40px" />
-        <Text fontSize="lg" fontWeight="bold">
-          Isra's Cafe
-        </Text>
-      </HStack>
+      <Link to="/">
+        <HStack spacing={2} cursor="pointer">
+          <Image src={logo} alt="Restaurant Logo" boxSize="40px" />
+          <Text fontSize="lg" fontWeight="bold">
+            Isra's Cafe
+          </Text>
+        </HStack>
+      </Link>
 
       <HStack spacing={4}>
         {/* Cart */}
