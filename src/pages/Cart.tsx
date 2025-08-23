@@ -1,5 +1,4 @@
-// src/pages/CartPage.tsx
-import React from "react";
+import React, { useState } from "react";
 import {
   Box,
   Flex,
@@ -9,23 +8,79 @@ import {
   Divider,
   VStack,
   HStack,
+  useToast,
 } from "@chakra-ui/react";
 import { useCart } from "../context/CartContext";
 import Header from "./Header";
+import { supabase } from "../supabase";
 
 const GST_PERCENTAGE = 0.18; // 18% GST
 
 const CartPage: React.FC = () => {
   const { cart, addItem, removeItem, clearCart } = useCart();
+  const toast = useToast();
+  const [loading, setLoading] = useState(false);
+
+  const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   // Calculate subtotal
   const subtotal = Object.values(cart).reduce(
     (total, item) => total + item.price * item.quantity,
     0
   );
-
   const gst = subtotal * GST_PERCENTAGE;
   const total = subtotal + gst;
+
+  // Handle proceed to checkout
+  const handleCheckout = async () => {
+    if (Object.keys(cart).length === 0) {
+      toast({ title: "Cart is empty", status: "warning" });
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      // 1. Insert order
+      const { data: orderData, error: orderError } = await supabase
+        .from("order")
+        .insert([
+          {
+            customer_name: user.name || "Guest",
+            customer_mobile: user.phone || "N/A",
+            total_amount: total,
+            status: "PAYMENT_PENDING",
+          },
+        ])
+        .select()
+        .single();
+
+      if (orderError || !orderData) throw orderError;
+
+      const orderId = orderData.id;
+
+      // 2. Insert order items
+      const itemsToInsert = Object.values(cart).map((item) => ({
+        order_id: orderId,
+        item_name: item.name,
+        quantity: item.quantity,
+        price_per_item: item.price,
+      }));
+
+      const { error: itemsError } = await supabase
+        .from("order_item")
+        .insert(itemsToInsert);
+
+      if (itemsError) throw itemsError;
+
+      toast({ title: "Order created", status: "success" });
+    } catch (error) {
+      console.error(error);
+      toast({ title: "Failed to create order", status: "error" });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <>
@@ -112,7 +167,13 @@ const CartPage: React.FC = () => {
               <Text>Total</Text>
               <Text>₹{total.toFixed(2)}</Text>
             </Flex>
-            <Button colorScheme="blue" size="lg" mt={4}>
+            <Button
+              colorScheme="blue"
+              size="lg"
+              mt={4}
+              isLoading={loading}
+              onClick={handleCheckout}
+            >
               Proceed to Checkout
             </Button>
           </VStack>
