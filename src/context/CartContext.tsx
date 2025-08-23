@@ -1,5 +1,5 @@
-// CartContext.tsx
-import React, { createContext, useContext, useEffect, useState } from "react";
+// src/context/CartContext.tsx
+import React, { createContext, useContext, useState, useEffect } from "react";
 import type { MenuItem } from "../pages/Menu";
 
 export type CartItem = MenuItem & { quantity: number };
@@ -14,40 +14,42 @@ export type CartContextType = {
 export const CartContext = createContext<CartContextType | undefined>(undefined);
 
 export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [cart, setCart] = useState<Record<string, CartItem>>({});
+  // ✅ Hydrate immediately from localStorage (avoids flash/empty on refresh)
+  const [cart, setCart] = useState<Record<string, CartItem>>(() => {
+    try {
+      const stored = localStorage.getItem("cart");
+      return stored ? JSON.parse(stored) : {};
+    } catch {
+      return {};
+    }
+  });
 
-  // Load once from localStorage
-  useEffect(() => {
-    const saved = localStorage.getItem("cart");
-    if (saved) setCart(JSON.parse(saved));
-  }, []);
-
-  // Save every time cart changes
+  // ✅ Persist to localStorage whenever cart changes
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
   const addItem = (item: MenuItem) => {
-    setCart(prev => {
+    setCart((prev) => {
       const existing = prev[item.id];
       return {
         ...prev,
-        [item.id]: {
-          ...item,
-          quantity: existing ? existing.quantity + 1 : 1,
-        },
+        [item.id]: existing
+          ? { ...existing, quantity: existing.quantity + 1 }
+          : { ...item, quantity: 1 },
       };
     });
   };
 
   const removeItem = (item: MenuItem) => {
-    setCart(prev => {
+    setCart((prev) => {
       const existing = prev[item.id];
       if (!existing) return prev;
 
       if (existing.quantity <= 1) {
-        const { [item.id]: _, ...rest } = prev;
-        return rest;
+        const copy = { ...prev };
+        delete copy[item.id];
+        return copy;
       }
 
       return {
@@ -57,7 +59,10 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     });
   };
 
-  const clearCart = () => setCart({});
+  const clearCart = () => {
+    setCart({});
+    localStorage.removeItem("cart");
+  };
 
   return (
     <CartContext.Provider value={{ cart, addItem, removeItem, clearCart }}>
@@ -68,6 +73,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
 export const useCart = () => {
   const ctx = useContext(CartContext);
-  if (!ctx) throw new Error("useCart must be used inside CartProvider");
+  if (!ctx) throw new Error("useCart must be used within a CartProvider");
   return ctx;
 };

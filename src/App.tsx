@@ -10,6 +10,7 @@ import AdminLayout from "./admin/pages/Layout";
 import MenuManagement from "./admin/pages/MenuManagement";
 import Orders from "./admin/pages/OrderManagement";
 import Cart from "./pages/Cart";
+import AfterPayment from "./pages/AfterPayment";
 
 function ProtectedRoute({ children }: { children: ReactNode }) {
   const { user, loading } = useUser();
@@ -35,6 +36,7 @@ function App() {
                 <Route index element={<Navigate to="/admin/orders" replace />} />
               </Route>
               <Route path="/" element={<Login />} />
+              <Route path="/after-payment" element={<AfterPayment />} />
               <Route
                 path="/menu"
                 element={
