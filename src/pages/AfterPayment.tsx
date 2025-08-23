@@ -41,22 +41,38 @@ export default function AfterPayment() {
   const { clearCart } = useCart();
 
   useEffect(() => {
-    const url = new URL(window.location.href);
-    const s = url.searchParams.get("status");
-    if (s === "failure") setStatus("failure");
+    const aa = async () => {
+      const url = new URL(window.location.href);
+      const s = url.searchParams.get("status");
+      if (s === "failure") setStatus("failure");
 
-    // If success, fetch the order from Supabase using orderId param
-    if (s === "success") {
-      const orderId = url.searchParams.get("orderId");
-      if (!orderId) {
-        toast({ title: "Order ID not found", status: "error" });
+      // If success, fetch the order from Supabase using orderId param
+      if (s === "success") {
+        const orderId = url.searchParams.get("orderId");
+        if (!orderId) {
+          toast({ title: "Order ID not found", status: "error" });
+          setLoading(false);
+          return;
+        }
+
+        const { error } = await supabase
+          .from("order")
+          .update({ status: "ORDER_PLACED" })
+          .eq("id", orderId);
+
+        if (error) {
+          toast({ title: "Failed to update order status", status: "error" });
+          setLoading(false);
+          // we can still proceed despite this error
+          // Customer is in the restaurant and can request for manual update of order status
+        }
+        fetchOrder(orderId);
+      } else {
         setLoading(false);
-        return;
       }
-      fetchOrder(orderId);
-    } else {
-      setLoading(false);
-    }
+    };
+
+    aa();
   }, []);
 
   const fetchOrder = async (orderId: string) => {
