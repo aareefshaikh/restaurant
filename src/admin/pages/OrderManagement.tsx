@@ -50,7 +50,7 @@ const OrderManagement: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const [orders, setOrders] = useState<Order[]>([]);
   const [selectedOrderItems, setSelectedOrderItems] = useState<OrderItem[]>([]);
-  const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
+  const [_, setSelectedOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(false);
   const toast = useToast();
 
